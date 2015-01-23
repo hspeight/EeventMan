@@ -72,9 +72,11 @@ public class MyDBHandler extends SQLiteOpenHelper {
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
 
-        while (c.isAfterLast() == false) {
-            System.out.println("!!- "  + "in while " + c.getCount());
+        while (!c.isAfterLast()) {
+            //System.out.println("!!- "  + "in while " + c.getCount());
             if (c.getString(c.getColumnIndex("eventname")) != null) {
+                dbString += c.getString(c.getColumnIndex("_id"));
+                dbString += "::";
                 dbString += c.getString(c.getColumnIndex("eventname"));
                 dbString += ",";
                 c.moveToNext();
@@ -86,11 +88,19 @@ public class MyDBHandler extends SQLiteOpenHelper {
     }
 
     //Delete a row from the database
-    public void deleteEvent (String eventName) {
+    public boolean deleteEvent (String eventName) {
+
+        boolean result = false;
 
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_EVENT_NAME + "=\"" + eventName + "\";");
-
+        try {
+            //db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_EVENT_NAME + "=\"" + eventName + "\";");
+            db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_ID + "=\"" + eventName + "\";");
+            result = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public String dbtostring() {

@@ -24,6 +24,7 @@
         android:inputType="text"
         android:layout_below="@+id/textEventTitle"
         android:imeOptions="actionDone"
+        android:hint = "Enter your event title here"
         android:layout_centerHorizontal="true" />
 
     <TextView
