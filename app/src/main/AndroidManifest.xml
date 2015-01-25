@@ -16,8 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".NewCounterActivity"
+            android:name=".EventEditor"
             android:label="@string/title_activity_new_counter"
             android:parentActivityName=".MainActivity" >
             <meta-data
@@ -25,12 +26,12 @@
                 android:value="com.example.hector.EventMan.MainActivity" />
         </activity>
         <activity
-            android:name=".EventEditor"
+            android:name=".ShowCounter"
             android:label="@string/title_activity_event_editor"
-            android:parentActivityName=".NewCounterActivity" >
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.hector.EventMan.NewCounterActivity" />
+                android:value="com.example.hector.EventMan.MainActivity" />
         </activity>
     </application>
 

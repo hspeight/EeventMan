@@ -3,3 +3,5 @@ create app icon
 order event list by alpha
 include a theme?
 backgrounds/wallpapers
+versioning http://developer.android.com/tools/publishing/versioning.html
+make mins & seconds optional

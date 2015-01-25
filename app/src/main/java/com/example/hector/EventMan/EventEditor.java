@@ -3,6 +3,7 @@ package com.example.hector.EventMan;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+//import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,7 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+//import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -22,8 +23,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+//import org.joda.time.format.DateTimeFormat;
+//import org.joda.time.format.DateTimeFormatter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,9 +48,10 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
     private int idx;
     private int cidx;
     private int timeInSeconds;
+    private String tranType;
+    private int countDirection;
+    private int useTime;
 
-
-    //public String countDirection = "Up";
     /** This integer will uniquely define the dialog to be used for displaying date picker.*/
     static final int DATE_DIALOG_ID = 0;
 
@@ -84,7 +89,6 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
 
         //  boolean invalidDate = false;
         final DateTime dtNow = new DateTime();
-        // System.out.println("!!- " + dtNow.getMinuteOfDay() + "/" + dtNow.getMinuteOfHour());
 
         RadioGroup rg = (RadioGroup) findViewById(R.id.radioDirection);
         int radioButtonID = rg.getCheckedRadioButtonId();
@@ -98,6 +102,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         }
 
         pDisplayDate.setTextColor(Color.BLUE);
+
         final DateTime dt = new DateTime(pYear, pMonth + 1, pDay, 0, 0);
         String month = dt.monthOfYear().getAsShortText();
         pDisplayDate.setText(pDay + " " + month  + " " + pYear);
@@ -126,18 +131,14 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
                             dtNow.getHourOfDay(),
                             dtNow.getMinuteOfHour(),
                             true).show();
-                    //updateTime();
                 }
                 //    Toast.makeText(getApplicationContext(), "Time field clicked", Toast.LENGTH_SHORT).show();
             });
-            //textTime.setEnabled(false);
-            //textTime.setText("01:00");
-            //textTime.setText(new StringBuilder().append(pad(mHour)).append(":")
-            textTime.setText(pad(dtNow.getHourOfDay()) + ":" + pad(dtNow.getMinuteOfHour()));
-
+            if ((tranType == "update") && (useTime == 1))
+                textTime.setText(pad(mHour) + ":" + pad(mMinute));
+            else
+                textTime.setText(pad(dtNow.getHourOfDay()) + ":" + pad(dtNow.getMinuteOfHour()));
         } else {
-            //System.out.println("!!- " + "box not checked");
-            //textTime.setEnabled(true);
             cidx = 0;
             textTime.setText("");
         }
@@ -168,30 +169,58 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         //return result;
     }
 
-    /** Displays a notification when the date is updated */
-    private void displayToast() {
-        // Toast.makeText(this, new StringBuilder().append("Date choosen is ").append(pDisplayDate.getText()), Toast.LENGTH_SHORT).show();
-
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_event_editor);
-
         hsEditText = (EditText) findViewById(R.id.hsEditText);
-        // hsTextView = (TextView) findViewById(R.id.hsTextView);
-        dbHandler = new MyDBHandler(this, null, null, 1);
-
-        /** Capture our View elements */
+        textUpDown = (TextView) findViewById(R.id.textViewDirection);
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioDirection);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.checkBoxTime);
         pDisplayDate = (TextView) findViewById(R.id.inputDate);
         textTime = (TextView) findViewById(R.id.textViewTime);
-        textUpDown = (TextView) findViewById(R.id.textViewDirection);
-        addButton = (Button) findViewById(R.id.buttonAdd);
+        tranType = "add";
 
-        // pPickDate = (Button) findViewById(R.id.pickDate);
+        dbHandler = new MyDBHandler(this, null, null, 1);
+
+        // If this is an update there will be an associated row ID in the extras
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null) {
+            tranType = "update";
+            Events myEvent = dbHandler.myEvent(bundle.getString("ROW_ID"));
+            hsEditText.setText(myEvent.get_eventname());
+            countDirection = myEvent.get_direction();
+            useTime = myEvent.get_evusetime();
+
+            if (countDirection == 1)
+                radioGroup.check(R.id.radioButtonCountDown);
+            else
+                radioGroup.check(R.id.radioButtonCountUp);
+            if (useTime == 1) {
+               // cidx = 1;
+                checkBox.setChecked(true);
+            }
+
+            long millis = myEvent.get_evtime();
+            millis *= 1000;
+            DateTime dt = new DateTime(millis, DateTimeZone.forOffsetHours(0));
+            DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd-HH-mm");
+
+            pYear = Integer.parseInt(dtf.print(dt).split("-")[0]);
+            pMonth = (Integer.parseInt(dtf.print(dt).split("-")[1]) - 1);
+            pDay = Integer.parseInt(dtf.print(dt).split("-")[2]);
+            mHour = Integer.parseInt(dtf.print(dt).split("-")[3]);
+            mMinute = Integer.parseInt(dtf.print(dt).split("-")[4]);
+        } else {
+            final Calendar cal = Calendar.getInstance();
+            pYear = cal.get(Calendar.YEAR);
+            pMonth = cal.get(Calendar.MONTH);
+            pDay = cal.get(Calendar.DAY_OF_MONTH);
+        }
+
+        addButton = (Button) findViewById(R.id.buttonAdd);
 
         /** Listener for click event of the date field */
         pDisplayDate.setOnClickListener(new View.OnClickListener() {
@@ -200,26 +229,8 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
                 showDialog(DATE_DIALOG_ID);
             }
         });
-/*
 
-        textTime.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new TimePickerDialog(EventEditor.this,
-                        t,
-                        10,
-                        11,
-                        true).show();
-            }
-            //    Toast.makeText(getApplicationContext(), "Time field clicked", Toast.LENGTH_SHORT).show();
-        });
-*/
-        /** Get the current date */
-        final Calendar cal = Calendar.getInstance();
-        pYear = cal.get(Calendar.YEAR);
-        pMonth = cal.get(Calendar.MONTH);
-        pDay = cal.get(Calendar.DAY_OF_MONTH);
-
-        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioDirection);
+        //final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioDirection);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -228,8 +239,8 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
             }
         });
 
-        CheckBox chkTime = (CheckBox) findViewById(R.id.checkBoxTime);
-        chkTime.setOnClickListener(new OnClickListener() {
+        //CheckBox chkTime = (CheckBox) findViewById(R.id.checkBoxTime);
+        checkBox.setOnClickListener(new OnClickListener() {
             //@Override
             public void onClick(View v) {
                 updateDisplay();
@@ -242,11 +253,10 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
     public void addButtonClicked(View view) {
 
         String EventTitle = hsEditText.getText().toString();
-        //System.out.println("!!- " + EventTitle + "/" + EventTitle.length());
         if(EventTitle.isEmpty()) {
             Toast mytoast = Toast.makeText(getApplicationContext(),"Please  title your event",Toast.LENGTH_SHORT);
             //        Toast.makeText(getApplicationContext(), "Please  title your event", Toast.LENGTH_SHORT).show();
-            mytoast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
+            mytoast.setGravity(Gravity.CENTER, 0, 0);
             mytoast.show();
             return;
         }
@@ -263,7 +273,6 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
             Date mDate = sdf.parse(givenDateString);
             //long timeInMilliseconds = mDate.getTime();
             timeInSeconds = (int)(mDate.getTime() / 1000);
-            //System.out.println("!!- " + givenDateString + "/" + mDate.getTime() + "/" + (int)mDate.getTime() + "/" + timeInMilliseconds);
         } catch (ParseException e) {
             //System.out.println("!!- " + pDisplayDate.getText() + dbTime + "bad!");
             e.printStackTrace();
@@ -274,19 +283,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         Toast.makeText(getApplicationContext(), "Your event has been created", Toast.LENGTH_SHORT).show();
         // printDatabase();
     }
-    /*
-        public void deleteButtonClicked(View view) {
-            String inputText = hsEditText.getText().toString();
-            dbHandler.deleteEvent(inputText);
-            //printDatabase();
-        }
-    /*
-        public void printDatabase() {
-            String dbString = dbHandler.dbtostring();
-        //    hsTextView.setText(dbString);
-        //    hsEditText.setText("");
-        }
-    */
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

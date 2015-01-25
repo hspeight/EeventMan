@@ -33,11 +33,11 @@ class CustomAdapter extends ArrayAdapter<String> {
         ImageView buckysImage = (ImageView) customView.findViewById(R.id.imageViewList);
         TextView rowid = (TextView) customView.findViewById(R.id.textViewRowID);
 
-        buckysText.setText(singleFoodItem.replaceAll("[0-9]+::",""));
+        buckysText.setText(singleFoodItem.replaceAll("[0-9]+::","")); // strip out record ID
         buckysText.setTypeface(null, Typeface.BOLD_ITALIC);
        // buckysText.setBackgroundColor(Color.parseColor("#636161"));
         buckysImage.setImageResource(R.drawable.calendar4list);
-        rowid.setText(singleFoodItem.replaceAll("::.*$",""));
+        rowid.setText(singleFoodItem.replaceAll("::.*$","")); // removes everything after the record ID
         //System.out.println("!!- " + "id is " + rowid.getText() + " string is " + buckysText.getText());
         return customView;
     }

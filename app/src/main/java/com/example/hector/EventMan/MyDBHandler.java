@@ -66,7 +66,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
     public String getAllEvents() {
 
         String dbString = "";
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
+        //SQLiteDatabase db = getWritableDatabase();
         String query = "SELECT * FROM " + TABLE_EVENTS +" WHERE 1;";
        // System.out.println("!!- "  + query);
         Cursor c = db.rawQuery(query, null);
@@ -76,15 +77,35 @@ public class MyDBHandler extends SQLiteOpenHelper {
             //System.out.println("!!- "  + "in while " + c.getCount());
             if (c.getString(c.getColumnIndex("eventname")) != null) {
                 dbString += c.getString(c.getColumnIndex("_id"));
-                dbString += "::";
+                dbString += "::"; // Delimiter between record ID & event title
                 dbString += c.getString(c.getColumnIndex("eventname"));
-                dbString += ",";
+                dbString += "~"; // Record delimiter
                 c.moveToNext();
             }
 
         }
         db.close();
         return dbString;
+    }
+
+    //public String getSingleEvent(String rowid) {
+
+        // Getting single event
+    public  Events myEvent(String rowid) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_EVENTS, new String[] { COLUMN_ID,
+                        COLUMN_EVENT_NAME, COLUMN_EVENT_DIR,COLUMN_EVENT_TIME,COLUMN_EVENT_USETIME }, COLUMN_ID + "=?",
+                new String[] { rowid }, null, null, null, null);
+
+        if (cursor != null)
+            cursor.moveToFirst();
+        //System.out.println("!!- "  + "checkbox is " + Integer.parseInt(cursor.getString(4)));
+
+        return new Events(cursor.getString(1),
+                Integer.parseInt(cursor.getString(2)), Integer.parseInt(cursor.getString(3)),
+                Integer.parseInt(cursor.getString(4)));
     }
 
     //Delete a row from the database

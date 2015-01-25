@@ -22,20 +22,9 @@
         android:id="@+id/hsEditText"
         android:width="300dp"
         android:inputType="text"
-        android:layout_below="@+id/textEventTitle"
         android:imeOptions="actionDone"
         android:hint = "Enter your event title here"
         android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Event Title"
-        android:id="@+id/textEventTitle"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/hsEditText"
-        android:layout_alignStart="@+id/hsEditText" />
 
     <TextView
         android:id="@+id/inputDate"
@@ -43,8 +32,8 @@
         android:layout_height="wrap_content"
         android:text="InputDate"
         android:layout_alignTop="@+id/textViewDirection"
-        android:layout_toRightOf="@+id/textEventTitle"
-        android:layout_toEndOf="@+id/textEventTitle" />
+        android:layout_toRightOf="@+id/checkBoxTime"
+        android:layout_toEndOf="@+id/checkBoxTime" />
 
     <RadioGroup
         android:id="@+id/radioDirection"

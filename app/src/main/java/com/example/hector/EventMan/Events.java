@@ -6,14 +6,16 @@ package com.example.hector.EventMan;
 public class Events {
 
     private int _id;
-    private String  _eventname;
+    private String _eventname;
     private int _direction;
     private int _evtime;
     private int _evusetime;
 
+    // empty constructor
     public Events() {
     }
 
+    // constructor
     public Events(String eventname, int direction, int evtime, int evusetime) {
         this._eventname = eventname;
         this._direction = direction;
