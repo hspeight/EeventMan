@@ -24,6 +24,7 @@ import android.widget.Toast;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 //import org.joda.time.format.DateTimeFormat;
@@ -51,6 +52,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
     private String tranType;
     private int countDirection;
     private int useTime;
+    private String rowID;
 
     /** This integer will uniquely define the dialog to be used for displaying date picker.*/
     static final int DATE_DIALOG_ID = 0;
@@ -103,7 +105,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
 
         pDisplayDate.setTextColor(Color.BLUE);
 
-        final DateTime dt = new DateTime(pYear, pMonth + 1, pDay, 0, 0);
+        final LocalDateTime dt = new LocalDateTime(pYear, pMonth + 1, pDay, 0, 0);
         String month = dt.monthOfYear().getAsShortText();
         pDisplayDate.setText(pDay + " " + month  + " " + pYear);
 
@@ -134,7 +136,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
                 }
                 //    Toast.makeText(getApplicationContext(), "Time field clicked", Toast.LENGTH_SHORT).show();
             });
-            if ((tranType == "update") && (useTime == 1))
+            if ((tranType.equals("update")) && (useTime == 1))
                 textTime.setText(pad(mHour) + ":" + pad(mMinute));
             else
                 textTime.setText(pad(dtNow.getHourOfDay()) + ":" + pad(dtNow.getMinuteOfHour()));
@@ -181,6 +183,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         CheckBox checkBox = (CheckBox) findViewById(R.id.checkBoxTime);
         pDisplayDate = (TextView) findViewById(R.id.inputDate);
         textTime = (TextView) findViewById(R.id.textViewTime);
+        addButton = (Button) findViewById(R.id.buttonAdd);
         tranType = "add";
 
         dbHandler = new MyDBHandler(this, null, null, 1);
@@ -189,7 +192,8 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         Bundle bundle = getIntent().getExtras();
         if(bundle != null) {
             tranType = "update";
-            Events myEvent = dbHandler.myEvent(bundle.getString("ROW_ID"));
+            rowID = bundle.getString("ROW_ID");
+            Events myEvent = dbHandler.myEvent(rowID);
             hsEditText.setText(myEvent.get_eventname());
             countDirection = myEvent.get_direction();
             useTime = myEvent.get_evusetime();
@@ -213,14 +217,13 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
             pDay = Integer.parseInt(dtf.print(dt).split("-")[2]);
             mHour = Integer.parseInt(dtf.print(dt).split("-")[3]);
             mMinute = Integer.parseInt(dtf.print(dt).split("-")[4]);
+            addButton.setText("Update");
         } else {
             final Calendar cal = Calendar.getInstance();
             pYear = cal.get(Calendar.YEAR);
             pMonth = cal.get(Calendar.MONTH);
             pDay = cal.get(Calendar.DAY_OF_MONTH);
         }
-
-        addButton = (Button) findViewById(R.id.buttonAdd);
 
         /** Listener for click event of the date field */
         pDisplayDate.setOnClickListener(new View.OnClickListener() {
@@ -277,11 +280,18 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
             //System.out.println("!!- " + pDisplayDate.getText() + dbTime + "bad!");
             e.printStackTrace();
         }
-        Events event = new Events(EventTitle, idx, timeInSeconds, cidx);
-        dbHandler.addEvent(event);
+        //Events event = new Events(EventTitle, idx, timeInSeconds, cidx);
 
-        Toast.makeText(getApplicationContext(), "Your event has been created", Toast.LENGTH_SHORT).show();
-        // printDatabase();
+        if (tranType.equals("update")) {
+            Events event = new Events(Integer.parseInt(rowID), EventTitle, idx, timeInSeconds, cidx);
+            dbHandler.updateEvent(event);
+            Toast.makeText(getApplicationContext(), "Event updated", Toast.LENGTH_SHORT).show();
+        } else {
+            Events event = new Events(EventTitle, idx, timeInSeconds, cidx);
+            dbHandler.addEvent(event);
+            Toast.makeText(getApplicationContext(), "Your event has been created", Toast.LENGTH_SHORT).show();
+        }
+        finish(); // return to previous activity
     }
 
     @Override
@@ -324,4 +334,3 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
     }
 
 }
-

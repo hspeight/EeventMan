@@ -1,6 +1,7 @@
 package com.example.hector.EventMan;
 
 //import android.app.Activity;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
+    private boolean eventsExist;
     //private TextView textUpDown;
     MyDBHandler dbHandler;
     //String evString;
@@ -27,18 +29,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_new_counter);
         dbHandler = new MyDBHandler(this, null, null, 1);
 
-        //String[] foods = {"Bacon", "Ham", "Tuna", "Candy", "Meatball", "Potato"};
-        String evstring = dbHandler.getAllEvents();
-
-        if (evstring.length() == 0) {
-            evstring = "You have no events set up. Click the + button to create a new one.";
-        }
-
-        String[] foods = evstring.split("~");
-
-        ListAdapter buckysAdapter = new CustomAdapter(this, foods);
         ListView buckysListView = (ListView) findViewById(R.id.buckysListView);
-        buckysListView.setAdapter(buckysAdapter);
+
 
         buckysListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -47,6 +39,8 @@ public class MainActivity extends ActionBarActivity {
                 Intent intent = new Intent(getBaseContext(), EventEditor.class);
                 intent.putExtra("ROW_ID",selected);
                 startActivity(intent);
+
+                //Activity.recreate();
                 //Toast.makeText(getApplicationContext(), "You clicked me all night long " + selected, Toast.LENGTH_SHORT).show();
             }
         });
@@ -67,6 +61,8 @@ public class MainActivity extends ActionBarActivity {
                                 boolean result = dbHandler.deleteEvent(selected);
                                 if (result) {
                                     Toast.makeText(getApplicationContext(), "Event Deleted", Toast.LENGTH_SHORT).show();
+                                    onPause();; // call onpause so that on onresume can be called to refresh list
+                                    onResume();
                                 }
                             }
                         })
@@ -106,5 +102,30 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        eventsExist = true;
+        //String[] foods = {"Bacon", "Ham", "Tuna", "Candy", "Meatball", "Potato"};
+        String evstring = dbHandler.getAllEvents();
+
+        if (evstring.length() == 0) {
+            evstring = "You have no events set up. Click the + button to create a new one.";
+            eventsExist = false;
+        }
+
+        String[] foods = evstring.split("~");
+
+        final ListAdapter buckysAdapter = new CustomAdapter(this, foods);
+        ListView buckysListView = (ListView) findViewById(R.id.buckysListView);
+        buckysListView.setAdapter(buckysAdapter);
+
+        if (!eventsExist) {
+            System.out.println("!!- " + "yes");
+            buckysListView.setEnabled(false);
+        }
     }
 }

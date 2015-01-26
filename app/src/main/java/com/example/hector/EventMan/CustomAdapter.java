@@ -1,7 +1,7 @@
 package com.example.hector.EventMan;
 
 import android.content.Context;
-import android.graphics.Color;
+//import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+//import java.util.regex.Matcher;
+//import java.util.regex.Pattern;
 
 class CustomAdapter extends ArrayAdapter<String> {
 

@@ -14,7 +14,14 @@ public class Events {
     // empty constructor
     public Events() {
     }
-
+    // constructor
+    public Events(int id, String eventname, int direction, int evtime, int evusetime) {
+        this._id = id;
+        this._eventname = eventname;
+        this._direction = direction;
+        this._evtime = evtime;
+        this._evusetime = evusetime;
+    }
     // constructor
     public Events(String eventname, int direction, int evtime, int evusetime) {
         this._eventname = eventname;

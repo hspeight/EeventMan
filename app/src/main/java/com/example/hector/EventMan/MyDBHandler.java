@@ -88,9 +88,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return dbString;
     }
 
-    //public String getSingleEvent(String rowid) {
-
-        // Getting single event
+    // Getting a single event
     public  Events myEvent(String rowid) {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -106,6 +104,22 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return new Events(cursor.getString(1),
                 Integer.parseInt(cursor.getString(2)), Integer.parseInt(cursor.getString(3)),
                 Integer.parseInt(cursor.getString(4)));
+    }
+
+    // Updating a single event
+    public int updateEvent(Events myEvent) {
+        //System.out.println("!!- "  + myEvent.get_id() + myEvent.get_eventname() + myEvent.get_evusetime() + myEvent.get_direction() + myEvent.get_evusetime());
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EVENT_NAME, myEvent.get_eventname());
+        values.put(COLUMN_EVENT_DIR, myEvent.get_direction());
+        values.put(COLUMN_EVENT_TIME, myEvent.get_evtime());
+        values.put(COLUMN_EVENT_USETIME, myEvent.get_evusetime());
+
+        // updating row
+        return db.update(TABLE_EVENTS, values, COLUMN_ID + " = ?",
+                new String[] { String.valueOf(myEvent.get_id()) });
     }
 
     //Delete a row from the database
