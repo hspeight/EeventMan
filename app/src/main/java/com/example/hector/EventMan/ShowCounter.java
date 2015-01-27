@@ -1,19 +1,13 @@
 package com.example.hector.EventMan;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ListAdapter;
-import android.widget.AdapterView;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,7 +28,7 @@ public class ShowCounter extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.show_counter);
 
         final TextView textSecs = (TextView)findViewById(R.id.textSecs);
         final TextView textMins = (TextView)findViewById(R.id.textMins);
@@ -44,7 +38,7 @@ public class ShowCounter extends ActionBarActivity {
         //final TextView textView2 = (TextView)findViewById(R.id.textView2);
         Button myButton;
 
-        String myDate = "2014-12-29 04:00:06 +0000";
+        String myDate = "2014-12-29 04:00:09 +0000";
         Date startDate = null;
         try {
             startDate = df.parse(myDate);

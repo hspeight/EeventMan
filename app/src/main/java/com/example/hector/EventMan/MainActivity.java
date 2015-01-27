@@ -1,7 +1,6 @@
 package com.example.hector.EventMan;
 
 //import android.app.Activity;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,11 +25,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_counter);
+        setContentView(R.layout.main_activity);
         dbHandler = new MyDBHandler(this, null, null, 1);
 
         ListView buckysListView = (ListView) findViewById(R.id.buckysListView);
-
+        //System.out.println("!!- " + "in 1");
 
         buckysListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -61,7 +60,7 @@ public class MainActivity extends ActionBarActivity {
                                 boolean result = dbHandler.deleteEvent(selected);
                                 if (result) {
                                     Toast.makeText(getApplicationContext(), "Event Deleted", Toast.LENGTH_SHORT).show();
-                                    onPause();; // call onpause so that on onresume can be called to refresh list
+                                    onPause(); // call onPause so that on onResume can be called to refresh list
                                     onResume();
                                 }
                             }

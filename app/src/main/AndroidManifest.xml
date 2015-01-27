@@ -19,7 +19,7 @@
 
         <activity
             android:name=".EventEditor"
-            android:label="@string/title_activity_new_counter"
+            android:label="@string/title_activity_event_manager"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
