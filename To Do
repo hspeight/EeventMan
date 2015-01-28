@@ -6,3 +6,5 @@ backgrounds/wallpapers
 versioning http://developer.android.com/tools/publishing/versioning.html
 make mins & seconds optional
 dont allow update if countdown target has been reached? (maybe)
+what should happen when a countdown is edited after the target date is reached?
+maximum number of events cannot exceed x

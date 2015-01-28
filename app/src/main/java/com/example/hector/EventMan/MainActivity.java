@@ -1,130 +1,126 @@
 package com.example.hector.EventMan;
 
-//import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.app.Activity;
+import android.widget.ExpandableListView;
 
-public class MainActivity extends ActionBarActivity {
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-    private boolean eventsExist;
-    //private TextView textUpDown;
+public class MainActivity extends Activity {
     MyDBHandler dbHandler;
-    //String evString;
+    EventAdapter myBaseExpandableListAdapter;
+    ExpandableListView myExpandableListView;
+    List<String> myListForGroup;
+    HashMap<String, List<String>> myMapForChild;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
         dbHandler = new MyDBHandler(this, null, null, 1);
 
-        ListView buckysListView = (ListView) findViewById(R.id.buckysListView);
-        //System.out.println("!!- " + "in 1");
+        myExpandableListView = (ExpandableListView)
+                findViewById(R.id.exp_list);
 
-        buckysListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view, int i, long l) {
-                String selected = ((TextView) view.findViewById(R.id.textViewRowID)).getText().toString();
-                Intent intent = new Intent(getBaseContext(), EventEditor.class);
-                intent.putExtra("ROW_ID",selected);
-                startActivity(intent);
+        initData();
 
-                //Activity.recreate();
-                //Toast.makeText(getApplicationContext(), "You clicked me all night long " + selected, Toast.LENGTH_SHORT).show();
-            }
-        });
+        myBaseExpandableListAdapter = new
+                EventAdapter(this, myListForGroup, myMapForChild);
 
-        buckysListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, final View view,
-                                           int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Delete Event?")
-                        .setIcon(R.drawable.ic_launcher)
-                        .setMessage("Click OK to delete the event")
-                        .setCancelable(false)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                String selected = ((TextView) view.findViewById(R.id.textViewRowID)).getText().toString();
-                                boolean result = dbHandler.deleteEvent(selected);
-                                if (result) {
-                                    Toast.makeText(getApplicationContext(), "Event Deleted", Toast.LENGTH_SHORT).show();
-                                    onPause(); // call onPause so that on onResume can be called to refresh list
-                                    onResume();
-                                }
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alert = builder.create();
-                alert.show();
-
-                return true;
-            }
-        });
+        myExpandableListView.setAdapter(myBaseExpandableListAdapter);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_new_counter, menu);
-        return true;
-    }
+    private void initData() {
+        myListForGroup = new ArrayList<String>();
+        myMapForChild = new HashMap<String, List<String>>();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        //System.out.println("!!- " + item.getItemId());
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        //String listGroup[] = new String[] {"A","B","C","D","E","F","G","H","I","J"};
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_add) {
-            Intent intent = new Intent(this, EventEditor.class);
-            startActivity(intent);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        eventsExist = true;
-        //String[] foods = {"Bacon", "Ham", "Tuna", "Candy", "Meatball", "Potato"};
         String evstring = dbHandler.getAllEvents();
-
-        if (evstring.length() == 0) {
-            evstring = "You have no events set up. Click the + button to create a new one.";
-            eventsExist = false;
-        }
-
         String[] foods = evstring.split("~");
+        //List<String> listGroupA;
+        int i;
+        String evTit;
+        String rowID;
+        for (i=0; i<foods.length; i++){
+            evTit = foods[i].replaceAll("[0-9]+::",""); // removes the record ID
+            rowID = foods[i].replaceAll("::.*$",""); // removes everything after the record ID
+            Events myEvent = dbHandler.myEvent(rowID);
 
-        final ListAdapter buckysAdapter = new CustomAdapter(this, foods);
-        ListView buckysListView = (ListView) findViewById(R.id.buckysListView);
-        buckysListView.setAdapter(buckysAdapter);
-
-        if (!eventsExist) {
-            System.out.println("!!- " + "yes");
-            buckysListView.setEnabled(false);
+            setupExpandableListItems(evTit, i, myEvent.get_evtime(), myEvent.get_direction());
+ /*
+                System.out.println("!!- " + i);
+                List<String> listGroupA = new ArrayList<String>();
+                listGroupA.add("event detail");
+                myListForGroup.add(foods[i]);
+                myMapForChild.put(foods[i], listGroupA);
+  */
+           // }
+           // myListForGroup.add(foods[i]);
         }
+/*
+        List<String> listGroupA = new ArrayList<String>();
+        listGroupA.add(foods[0]);
+        listGroupA.add(foods[1]);
+        listGroupA.add(foods[2]);
+
+        List<String> listGroupB = new ArrayList<String>();
+        listGroupB.add("B - 1");
+
+        List<String> listGroupC = new ArrayList<String>();
+        listGroupC.add("C - 1");
+        listGroupC.add("C - 2");
+*/
+        //myListForGroup.add("Group A");
+      //  myListForGroup.add("Group B");
+       // myListForGroup.add("Group C");
+
+        //myMapForChild.put(myListForGroup.get(0), listGroupA);
+      //  myMapForChild.put(myListForGroup.get(1), listGroupB);
+      //  myMapForChild.put(myListForGroup.get(2), listGroupC);
+    }
+
+    public void setupExpandableListItems(String food, int i, int eventTime, int direction){
+
+        //int i;
+        //System.out.println("!!- " + i);
+        switch (i) {
+            case 0:
+                List<String> listGroupA = new ArrayList<String>();
+                listGroupA.add(formatDateTime(eventTime,direction));
+                myMapForChild.put(food, listGroupA);
+                break;
+            case 1:
+                List<String> listGroupB = new ArrayList<String>();
+                listGroupB.add(formatDateTime(eventTime,direction));
+                myMapForChild.put(food, listGroupB);
+                break;
+            case 2:
+                List<String> listGroupC = new ArrayList<String>();
+                listGroupC.add(formatDateTime(eventTime,direction));
+                myMapForChild.put(food, listGroupC);
+                break;
+        }
+        myListForGroup.add(food);
+    }
+
+    public String formatDateTime(int eventTime,int direction){
+        String[] d = new String[] {"up from","down to"};
+        long millis = eventTime;
+        millis *= 1000;
+        DateTime dt = new DateTime(millis, DateTimeZone.forOffsetHours(0)); // needs to be a local date
+        DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMM yyyy HH:mm");
+
+        return "Count " + d[direction] + " " + dtf.print(dt);
     }
 }

@@ -51,7 +51,7 @@ public class ShowCounter extends ActionBarActivity {
 
         //double timeDiff2 = Math.abs(dateOne.getTime() - System.currentTimeMillis());
         //System.out.println("difference:" + df.format(c.getTime()) + "!" + timeDiff + " " + System.currentTimeMillis());   // difference: 0
-        //System.out.println("-!:" + timeDiff);   // difference: 0
+        //System.out.println("!!- " + timeDiff);   // difference: 0
 
         new CountDownTimer(20000000, 1000){ // 1st value is seconds in 1 year
             public void onTick(long millisUntilFinished){
