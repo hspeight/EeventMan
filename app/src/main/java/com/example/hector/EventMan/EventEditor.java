@@ -193,7 +193,7 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
         if(bundle != null) {
             tranType = "update";
             rowID = bundle.getString("ROW_ID");
-            Events myEvent = dbHandler.myEvent(rowID);
+            Events myEvent = dbHandler.getMyEvent(rowID);
             hsEditText.setText(myEvent.get_eventname());
             countDirection = myEvent.get_direction();
             useTime = myEvent.get_evusetime();

@@ -63,6 +63,30 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.close();
 
     }
+
+    public String getEventIDs() {
+
+        String dbString = "";
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT _id FROM " + TABLE_EVENTS + ";";
+        // System.out.println("!!- "  + query);
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+
+        while (!c.isAfterLast()) {
+            //System.out.println("!!- "  + "in while " + c.getCount());
+            if (c.getString(c.getColumnIndex("_id")) != null) {
+                dbString += c.getString(c.getColumnIndex("_id"));
+                dbString += ":"; // Delimiter between record IDs
+                c.moveToNext();
+            }
+        }
+        //System.out.println("!!- "  + dbString);
+        db.close();
+        return dbString;
+    }
+
     public String getAllEvents() {
 
         String dbString = "";
@@ -89,7 +113,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
     }
 
     // Getting a single event
-    public  Events myEvent(String rowid) {
+    public  Events getMyEvent(String rowid) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 

@@ -1,117 +1,87 @@
 package com.example.hector.EventMan;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import android.app.ExpandableListActivity;
+import android.content.Context;
 import android.os.Bundle;
-import android.app.Activity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class MainActivity extends Activity {
-    MyDBHandler dbHandler;
-    EventAdapter myBaseExpandableListAdapter;
-    ExpandableListView myExpandableListView;
-    List<String> myListForGroup;
-    HashMap<String, List<String>> myMapForChild;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+public class MainActivity extends ExpandableListActivity
+{
+    MyDBHandler dbHandler;
+    // Create ArrayList to hold parent Items and Child Items
+    private ArrayList<String> parentItems = new ArrayList<String>();
+    private ArrayList<Object> childItems = new ArrayList<Object>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
 
         dbHandler = new MyDBHandler(this, null, null, 1);
+        // Create Expandable List and set it's properties
+        final ExpandableListView expandableList = getExpandableListView();
+        expandableList.setDividerHeight(2);
+        expandableList.setGroupIndicator(null);
+        expandableList.setClickable(true);
 
-        myExpandableListView = (ExpandableListView)
-                findViewById(R.id.exp_list);
+        expandableList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            int previousItem = -1;
 
-        initData();
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                if(groupPosition != previousItem )
+                    expandableList.collapseGroup(previousItem );
+                previousItem = groupPosition;
+            }
+        });
 
-        myBaseExpandableListAdapter = new
-                EventAdapter(this, myListForGroup, myMapForChild);
+        // Set the Items of Parent
+        setGroupParents();
+        // Set The Child Data
+        //setChildData();
 
-        myExpandableListView.setAdapter(myBaseExpandableListAdapter);
+        // Create the Adapter
+        EventAdapter adapter = new EventAdapter(parentItems, childItems);
+
+        adapter.setInflater((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE), this);
+
+        // Set the Adapter to expandableList
+        expandableList.setAdapter(adapter);
+        expandableList.setOnChildClickListener(this);
     }
 
-    private void initData() {
-        myListForGroup = new ArrayList<String>();
-        myMapForChild = new HashMap<String, List<String>>();
+    // method to add parent Items
+    public void setGroupParents()
+    {
+        ArrayList<String> child = new ArrayList<String>();
+        String evstring = dbHandler.getEventIDs();
+        String[] foods = evstring.split(":");
 
-        //String listGroup[] = new String[] {"A","B","C","D","E","F","G","H","I","J"};
-
-        String evstring = dbHandler.getAllEvents();
-        String[] foods = evstring.split("~");
-        //List<String> listGroupA;
         int i;
         String evTit;
         String rowID;
-        for (i=0; i<foods.length; i++){
-            evTit = foods[i].replaceAll("[0-9]+::",""); // removes the record ID
-            rowID = foods[i].replaceAll("::.*$",""); // removes everything after the record ID
-            Events myEvent = dbHandler.myEvent(rowID);
-
-            setupExpandableListItems(evTit, i, myEvent.get_evtime(), myEvent.get_direction());
- /*
-                System.out.println("!!- " + i);
-                List<String> listGroupA = new ArrayList<String>();
-                listGroupA.add("event detail");
-                myListForGroup.add(foods[i]);
-                myMapForChild.put(foods[i], listGroupA);
-  */
-           // }
-           // myListForGroup.add(foods[i]);
+        for (i=0; i<foods.length; i++) {
+            Events myEvent = dbHandler.getMyEvent(foods[i]);
+            //evTit = foods[i].replaceAll("[0-9]+::", ""); // removes the record ID
+            //rowID = foods[i].replaceAll("::.*$", ""); // removes everything after the record ID
+           // Events myEvent = dbHandler.myEvent(rowID);
+            parentItems.add(myEvent.get_eventname());
+            child.add(formatDateTime(myEvent.get_evtime(),myEvent.get_direction()));
+            childItems.add(child);
+            child = new ArrayList<String>(); // reset child list to empty
         }
-/*
-        List<String> listGroupA = new ArrayList<String>();
-        listGroupA.add(foods[0]);
-        listGroupA.add(foods[1]);
-        listGroupA.add(foods[2]);
-
-        List<String> listGroupB = new ArrayList<String>();
-        listGroupB.add("B - 1");
-
-        List<String> listGroupC = new ArrayList<String>();
-        listGroupC.add("C - 1");
-        listGroupC.add("C - 2");
-*/
-        //myListForGroup.add("Group A");
-      //  myListForGroup.add("Group B");
-       // myListForGroup.add("Group C");
-
-        //myMapForChild.put(myListForGroup.get(0), listGroupA);
-      //  myMapForChild.put(myListForGroup.get(1), listGroupB);
-      //  myMapForChild.put(myListForGroup.get(2), listGroupC);
-    }
-
-    public void setupExpandableListItems(String food, int i, int eventTime, int direction){
-
-        //int i;
-        //System.out.println("!!- " + i);
-        switch (i) {
-            case 0:
-                List<String> listGroupA = new ArrayList<String>();
-                listGroupA.add(formatDateTime(eventTime,direction));
-                myMapForChild.put(food, listGroupA);
-                break;
-            case 1:
-                List<String> listGroupB = new ArrayList<String>();
-                listGroupB.add(formatDateTime(eventTime,direction));
-                myMapForChild.put(food, listGroupB);
-                break;
-            case 2:
-                List<String> listGroupC = new ArrayList<String>();
-                listGroupC.add(formatDateTime(eventTime,direction));
-                myMapForChild.put(food, listGroupC);
-                break;
-        }
-        myListForGroup.add(food);
     }
 
     public String formatDateTime(int eventTime,int direction){
@@ -122,5 +92,26 @@ public class MainActivity extends Activity {
         DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMM yyyy HH:mm");
 
         return "Count " + d[direction] + " " + dtf.print(dt);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
