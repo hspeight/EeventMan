@@ -50,7 +50,7 @@ public class EventAdapter extends BaseExpandableListAdapter
         }
 
         // get the textView reference and set the value
-        textView = (TextView) convertView.findViewById(R.id.textViewChild);
+//        textView = (TextView) convertView.findViewById(R.id.textViewChild);
         textView.setText(child.get(childPosition));
 
         // set the ClickListener to handle the click event on child item

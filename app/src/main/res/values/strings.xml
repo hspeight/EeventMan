@@ -10,6 +10,7 @@
     <string name="hours">Hours</string>
     <string name="action_search">Search</string>
     <string name="action_add">Add</string>
+    <string name="action_delete">Delete</string>
     <string name="title_activity_event_manager">Event Manager</string>
     <string name="title_activity_event_editor">Event Editor</string>
 

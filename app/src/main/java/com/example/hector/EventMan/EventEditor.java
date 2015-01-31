@@ -1,9 +1,11 @@
 package com.example.hector.EventMan;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 //import android.content.Intent;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -281,7 +283,8 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
             e.printStackTrace();
         }
         //Events event = new Events(EventTitle, idx, timeInSeconds, cidx);
-
+        //int rowsInDB = dbHandler.getRowCount()
+        //System.out.println("!!- "  + dbHandler.getRowCount());
         if (tranType.equals("update")) {
             Events event = new Events(Integer.parseInt(rowID), EventTitle, idx, timeInSeconds, cidx);
             dbHandler.updateEvent(event);
@@ -303,17 +306,47 @@ public class EventEditor extends ActionBarActivity implements OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                deleteEvent();
+                return true;
+            case R.id.action_settings:
+                //openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean deleteEvent(){
+        //Toast.makeText(getApplicationContext(), "Delete clicked "  + rowID, Toast.LENGTH_SHORT).show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Event?")
+                .setIcon(R.drawable.ic_launcher)
+                .setMessage("Click OK to delete the event")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        boolean result = dbHandler.deleteEvent(rowID);
+                        if (result) {
+                            Toast.makeText(getApplicationContext(), "Event Deleted", Toast.LENGTH_SHORT).show();
+                            finish();
+                            //onPause();; // call onpause so that on onresume can be called to refresh list
+                            //onResume();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+
+        return true;
     }
     @Override
     public void onClick(View view) {

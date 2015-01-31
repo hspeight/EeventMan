@@ -1,12 +1,14 @@
 package com.example.hector.EventMan;
 
 import android.app.usage.UsageEvents;
+import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.Cursor;
 import android.content.Context;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteStatement;
 
 import java.sql.SQLDataException;
 
@@ -147,19 +149,27 @@ public class MyDBHandler extends SQLiteOpenHelper {
     }
 
     //Delete a row from the database
-    public boolean deleteEvent (String eventName) {
+    public boolean deleteEvent (String eventID) {
 
         boolean result = false;
 
         SQLiteDatabase db = getWritableDatabase();
         try {
             //db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_EVENT_NAME + "=\"" + eventName + "\";");
-            db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_ID + "=\"" + eventName + "\";");
+            db.execSQL("DELETE FROM " + TABLE_EVENTS + " WHERE " + COLUMN_ID + "=\"" + eventID + "\";");
             result = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return result;
+    }
+
+    // Get row count
+    public  long getRowCount() {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        return DatabaseUtils.queryNumEntries(db, TABLE_EVENTS);
+
     }
 
     public String dbtostring() {
